@@ -1,0 +1,13 @@
+[project]
+name = "lora-intrusion-detection-system"
+version = "0.1.0"
+description = "LoRa Intrusion Detection System including a FastAPI backend and a telegram bot
+authors = ["Sören Erichsen <soeren.erichsen@gmx.de>"]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "fastapi[standard]>=0.115.8",
+    "pydantic-settings>=2.7.1",
+    "sqlmodel>=0.0.22",
+]

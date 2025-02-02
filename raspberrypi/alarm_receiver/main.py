@@ -1,54 +1,84 @@
+import os
 import sys
+import threading
+import time
+import asyncio
+from queue import Queue
 
 import serial
-from decouple import config
+from dotenv import load_dotenv
 from loguru import logger
-from telegram import Bot
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import telegram
 
+load_dotenv()
 logger.remove()
-logger.add(sys.stdout, level=config("LOGLEVEL", cast=str))
+logger.add(sys.stdout, level=os.environ['LOGLEVEL'].upper())
 
-TELEGRAM_TOKEN = config(f"TELEGRAM_BOT_KEY", cast=str)
+TELEGRAM_TOKEN = os.environ['TELEGRAM_BOT_KEY']
 if TELEGRAM_TOKEN is None:
     logger.info(f"TELEGRAM_TOKEN env var not set")
     raise ValueError("No Telegram token provided")
 
-bot = Bot(token=TELEGRAM_TOKEN)
+lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
+                     bytesize=serial.EIGHTBITS, timeout=1)
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
+# Create a queue for messages
+message_queue = Queue()
 
 
-async def process_alarm() -> None:
-    await bot.send_message(chat_id="telegram_id", text=f"🚨🚨🚨🚨")
+def loop2():
+    while True:
+        data_read = lora.readline().decode('utf-8').strip()
+        if data_read != "":
+            print(f"Button was pressed: {data_read}")
+            # Instead of sending directly, put the message in the queue
+            message_queue.put(f"Button was pressed: {data_read}")
+        time.sleep(0.1)
 
 
-def read_lora(port='/dev/ttyS0', baudrate=9600):
-    try:
-        with serial.Serial(port, baudrate, parity=serial.PARITY_NONE,
-                           stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS) as lora:
-            print("Listening for LoRa messages...")
-            while True:
-                try:
-                    # Read a line from the LoRa module
-                    data_read = lora.readline().decode('utf-8').strip()
-                    if data_read:
-                        print(f"Received: {data_read}")
-                        process_alarm()
-                except serial.SerialException as e:
-                    print(f"Serial error: {e}")
-                    break
-                except UnicodeDecodeError as e:
-                    print(f"Decode error: {e}")
-                    continue
-                except Exception as e:
-                    print(f"Unexpected error: {e}")
-                    break
+def send_lora_message(message: str) -> None:
+    lora.write(bytes(message, 'utf-8'))
+    print(f"LoRa message was sent: {message}")
 
-    except serial.SerialException as e:
-        print(f"Could not open serial port: {e}")
+
+async def send_telegram_message(message: str) -> None:
+    await bot.send_message(chat_id="396331186", text=message)
+    print(f"Telegram message was send: {message}")
+
+
+async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.message.text
+    message = message.replace("/hello", "").strip()
+    send_lora_message(message)
+    await update.message.reply_text(f'🚨🚨 "{message}" send via LoRa🚨🚨')
+
+
+async def process_queue(application):
+    """Process messages from the queue"""
+    while True:
+        if not message_queue.empty():
+            message = message_queue.get()
+            await send_telegram_message(message)
+        await asyncio.sleep(0.1)
+
+
+def telegram_setup():
+    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(CommandHandler("hello", hello))
+
+    # Add the queue processor to the application
+    async def post_init(application):
+        application.create_task(process_queue(application))
+
+    app.post_init = post_init
+    app.run_polling()
 
 
 if __name__ == '__main__':
-    read_lora()
+    thread2 = threading.Thread(target=loop2, daemon=True)
+    thread2.start()
 
-
-
-
+    telegram_setup()

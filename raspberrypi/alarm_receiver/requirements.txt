@@ -1,3 +1,5 @@
 python-telegram-bot==21.10
-loguru==0.7.3
+python-dotenv==1.0.1
 python-decouple==3.8
+loguru==0.7.3
+pyserial==3.5

@@ -35,7 +35,7 @@ def setup_gpio_monitor(pin_number: int, callback_function: Callable) -> None:
     GPIO.setup(pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.add_event_detect(pin_number, GPIO.RISING,
                           callback=callback_function,
-                          bouncetime=200)  # Debounce time in milliseconds
+                          bouncetime=1000)  # Debounce time in milliseconds
 
 
 def cleanup():

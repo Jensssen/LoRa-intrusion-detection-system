@@ -14,6 +14,12 @@ class AlarmNotFound(AlarmException):
     pass
 
 
+class InvalidToken(AlarmException):
+    """User has provided an invalid or expired token"""
+
+    pass
+
+
 def create_exception_handler(
         status_code: int, initial_detail: Any
 ) -> Callable[[Request, Exception], JSONResponse]:
@@ -31,6 +37,17 @@ def register_all_errors(app: FastAPI):
             initial_detail={
                 "message": "Alarm Not Found",
                 "error_code": "alarm_not_found",
+            },
+        ),
+    )
+    app.add_exception_handler(
+        InvalidToken,
+        create_exception_handler(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            initial_detail={
+                "message": "Token is invalid Or expired",
+                "resolution": "Please get new token",
+                "error_code": "invalid_token",
             },
         ),
     )

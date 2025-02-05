@@ -14,4 +14,4 @@ WORKDIR /app
 
 RUN uv sync --frozen
 
-CMD ["uv", "run", "fastapi", "run", "app", "--port", "8000"]
+CMD ["uv", "run", "fastapi", "run", "app", "--port", "3000"]

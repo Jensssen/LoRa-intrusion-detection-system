@@ -1,0 +1,18 @@
+.venv
+Dockerfile
+.dockerignore
+
+# JWT private key
+app/keys/private_api_key.pem
+
+.env
+.git
+.gitignore
+
+*.tmp
+.DS_Store
+__pycache__
+
+.idea
+
+raspberrypi

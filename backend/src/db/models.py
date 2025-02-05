@@ -19,6 +19,8 @@ class AlarmState(SQLModel, table=True):
     # Relationship to Alarm
     alarm: "Alarm" = Relationship(back_populates="states")
 
+    def __repr__(self):
+        return f"<AlarmState {self.state_id}>"
 
 class Alarm(SQLModel, table=True):
     __tablename__ = "alarm"
@@ -30,5 +32,5 @@ class Alarm(SQLModel, table=True):
     states: list["AlarmState"] = Relationship(back_populates="alarm", sa_relationship_kwargs={"cascade": "all, delete"})
 
 
-def __repr__(self):
-    return f"<AlarmState {self.uid}>"
+    def __repr__(self):
+        return f"<Alarm {self.alarm_id}>"

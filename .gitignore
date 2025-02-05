@@ -171,4 +171,4 @@ cython_debug/
 .idea/
 
 # secret keys
-*.pem
+private_api_key.pem

@@ -2,8 +2,8 @@ from fastapi import Request
 from fastapi.security import HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials
 
-from backend.src.auth.utils import decode_token
-from backend.src.errors import InvalidToken
+from app.src.auth.utils import decode_token
+from app.src.errors import InvalidToken
 
 
 class AccessTokenBearer(HTTPBearer):

@@ -3,11 +3,11 @@ from typing import List
 from fastapi import APIRouter, status, Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from backend.src.alarm.schemas import AlarmCreateModel, Alarm, AlarmState, AlarmStateCreateModel
-from backend.src.alarm.service import AlarmService
-from backend.src.db.main import get_session
-from backend.src.errors import AlarmNotFound
-from backend.src.auth.dependencies import AccessTokenBearer
+from app.src.alarm.schemas import AlarmCreateModel, Alarm, AlarmState, AlarmStateCreateModel
+from app.src.alarm.service import AlarmService
+from app.src.db.main import get_session
+from app.src.errors import AlarmNotFound
+from app.src.auth.dependencies import AccessTokenBearer
 
 alarm_router = APIRouter()
 alarm_service = AlarmService()

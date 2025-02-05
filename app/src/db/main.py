@@ -4,7 +4,7 @@ from sqlmodel import SQLModel
 from sqlmodel import create_engine, text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from backend.src.config import Config
+from app.src.config import Config
 
 engine = AsyncEngine(
     create_engine(

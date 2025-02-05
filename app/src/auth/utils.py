@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import jwt
 
-from backend.src.config import Config
+from app.src.config import Config
 
 ACCESS_TOKEN_EXPIRY = 3600
 

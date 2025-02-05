@@ -2,10 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from backend.src.alarm.routes import alarm_router
-from backend.src.db.main import init_db
-from backend.src.db.models import Alarm, AlarmState
-from backend.src.errors import register_all_errors
+from app.src.alarm.routes import alarm_router
+from app.src.db.main import init_db
+from app.src.db.models import Alarm, AlarmState
+from app.src.errors import register_all_errors
 
 
 @asynccontextmanager

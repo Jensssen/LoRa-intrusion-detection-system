@@ -34,5 +34,5 @@
 
 1. run `sudo apt-get update && sudo apt-get upgrade`
 2. run `sudo apt install python3-pip` to install the python package manager
-3. run `sudo apt-get install python3-dev python3-rpi.gpio` to install the GPIO library
+3. run `sudo apt install python3-rpi-lgpio` to install the GPIO library
 

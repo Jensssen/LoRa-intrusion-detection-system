@@ -1,41 +1,27 @@
-import asyncio
 import os
 import sys
-import threading
-import time
-from queue import Queue
 
 import requests
 import serial
-import telegram
+import telegram.ext as tg_ext
 from dotenv import load_dotenv
 from loguru import logger
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import MessageHandler, filters, ContextTypes
 
 load_dotenv()
 logger.remove()
 logger.add(sys.stdout, level=os.environ['LOGLEVEL'].upper())
 
 TELEGRAM_TOKEN = os.environ['TELEGRAM_BOT_KEY']
+TELEGRAM_CHAT_ID = os.environ['TELEGRAM_CHAT_ID']
 ALARM_API_KEY = os.environ['ALARM_API_KEY']
 if TELEGRAM_TOKEN is None:
     logger.info(f"TELEGRAM_TOKEN env var not set")
     raise ValueError("No Telegram token provided")
 
-if ALARM_API_KEY is None:
-    logger.info(f"ALARM_API_KEY env var not set")
-    raise ValueError("No Alarm API key provided")
-
-
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS, timeout=1)
-
-TELEGRAM_CHAT_ID = "396331186"
-
-bot = telegram.Bot(token=TELEGRAM_TOKEN)
-
-message_queue = Queue()
 
 
 class AlarmHandler:
@@ -57,7 +43,7 @@ class AlarmHandler:
             logger.debug("Response Status Code:", response.status_code)
 
             try:
-                response_json = response.json()  # Try parsing JSON response
+                response_json = response.json()
                 logger.error("Response JSON:", response_json)
             except ValueError:
                 logger.error("Response is not in JSON format:", response.text)
@@ -75,17 +61,43 @@ class AlarmHandler:
 alarm_handler = AlarmHandler(ALARM_API_KEY)
 
 
-def lora_receiver_loop() -> None:
-    while True:
-        data_read = lora.readline().decode('utf-8').strip()
-        if data_read != "":
-            logger.debug(f"raw message: {data_read}")
-            data = data_read.split("||")[1]
+async def listen_to_lora(context: tg_ext.CallbackContext) -> None:
+    data_read = lora.readline().decode('utf-8').strip()
+    if data_read != "":
+        data_read = data_read.replace("||", "|")
+        data_read = data_read[1:-1]
+        data_read = data_read.split("|")
 
-            logger.debug(f"Button was pressed: {data}")
-            message_queue.put(f"Button was pressed: {data_read}")
+        ALARMS = [
+            {
+                "alarm_id": "5f525bd9-0a81-4cba-9fa5-f3fce4937f41",
+                "is_open": False,
+                "wiggles": False,
+                "alarm_on": True,
+            },
+            {
+                "alarm_id": "c83553b0-a8da-42ff-8d46-294904943e9b",
+                "is_open": False,
+                "wiggles": False,
+                "alarm_on": True,
+            }
+        ]
+        for alarm_status in data_read:
+            status = alarm_status.split(",")
+            ALARMS[int(status[0])]["is_open"] = bool(int(status[1]))
+            ALARMS[int(status[0])]["wiggles"] = bool(int(status[2]))
+            ALARMS[int(status[0])]["alarm_on"] = bool(int(status[3]))
 
-        time.sleep(0.1)
+        for idx, alarm in enumerate(ALARMS):
+            if alarm["is_open"]:
+                message = "ALARM! Door is open"
+                await context.bot.send_message(TELEGRAM_CHAT_ID, message)
+            if alarm["wiggles"]:
+                message = "Door wiggles!"
+                await context.bot.send_message(TELEGRAM_CHAT_ID, message)
+
+            logger.debug(f"Sending Data to API: {alarm}")
+            alarm_handler.send_alarm_state(alarm)
 
 
 def send_lora_message(message: str) -> None:
@@ -93,45 +105,27 @@ def send_lora_message(message: str) -> None:
     logger.debug(f"LoRa message was sent: {message}")
 
 
-async def send_telegram_message(message: str) -> None:
-    await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-    logger.debug(f"Telegram message was send: {message}")
-
-
-async def alarm_on(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    send_lora_message("ON")
-    await update.message.reply_text('Alarm has been turned ON')
-
-
-async def alarm_off(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    send_lora_message("OFF")
-    await update.message.reply_text('Alarm has been turned off')
-
-
-async def process_queue(application):
-    """Process messages from the queue"""
-    while True:
-        if not message_queue.empty():
-            message = message_queue.get()
-            await send_telegram_message(message)
-        await asyncio.sleep(0.1)
-
-
-def telegram_setup():
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("on", alarm_on))
-    app.add_handler(CommandHandler("off", alarm_off))
-
-    # Add the queue processor to the application
-    async def post_init(application):
-        application.create_task(process_queue(application))
-
-    app.post_init = post_init
-    app.run_polling()
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.text.lower()[0:3] == "on:":
+        message = update.message.text.lower()
+        command, alarm_id = message.split(":")
+        send_lora_message(update.message.text.lower())
+        await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned ON")
+    elif update.message.text.lower()[0:4] == "off:":
+        message = update.message.text.lower()
+        command, alarm_id = message.split(":")
+        send_lora_message(update.message.text.lower())
+        await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned OFF")
+    else:
+        await update.message.reply_text(f"Your Provided command: {update.message.text} is not supported. \n"
+                                        f"Please use one of the following commands: \n"
+                                        f"on:<alarm_idx>, off:<alarm_idx>")
 
 
 if __name__ == '__main__':
-    lora_thread = threading.Thread(target=lora_receiver_loop, daemon=True)
-    lora_thread.start()
+    app = tg_ext.ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT, handle_message))
 
-    telegram_setup()
+    job_queue = app.job_queue
+    job_queue.run_repeating(listen_to_lora, interval=5, first=1)
+    app.run_polling()

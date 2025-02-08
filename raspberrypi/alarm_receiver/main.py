@@ -74,12 +74,6 @@ async def listen_to_lora(context: tg_ext.CallbackContext) -> None:
                 "is_open": False,
                 "wiggles": False,
                 "alarm_on": True,
-            },
-            {
-                "alarm_id": "c83553b0-a8da-42ff-8d46-294904943e9b",
-                "is_open": False,
-                "wiggles": False,
-                "alarm_on": True,
             }
         ]
         for alarm_status in data_read:

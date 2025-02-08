@@ -4,3 +4,4 @@ python-decouple==3.8
 loguru==0.7.3
 pyserial==3.5
 requests==2.32.3
+python-telegram-bot[job-queue]>=21.10

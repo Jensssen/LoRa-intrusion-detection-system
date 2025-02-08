@@ -10,16 +10,19 @@ door_button = Button(3)
 STATUS_FREQUENCY = 1
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS, timeout=1)
+
+ALARM_IDS = ["5f525bd9-0a81-4cba-9fa5-f3fce4937f41", "1212121212121212121212121212121"]
+
 ALARMS = [
     {
-        "alarm_id": "5f525bd9-0a81-4cba-9fa5-f3fce4937f41",
+        "alarm_id": 0,
         "is_open": False,
         "wiggles": False,
         "alarm_on": True,
         "name": "Cellar"
     },
     {
-        "alarm_id": "1212121212121212121212121212121",
+        "alarm_id": 1,
         "is_open": False,
         "wiggles": False,
         "alarm_on": True,
@@ -59,7 +62,29 @@ def send_message(message: str) -> None:
     print(f"Sending: {message}")
     print("\n")
     lora.write(bytes(str(message), 'utf-8'))
-    time.sleep(1)
+    time.sleep(5)
+
+
+def listen_to_lora() -> None:
+    data_read = lora.readline().decode('utf-8').strip()
+
+    if "on:" in data_read.lower():
+        alarm_id = data_read.split(":")[-1]
+        try:
+            ALARMS[int(alarm_id)]["alarm_on"] = True
+            print(f"ALARM_STATE of {alarm_id} changed to {ALARMS[int(alarm_id)]['alarm_on']}")
+        except KeyError:
+            print(f"Provided alarm id was incorrect: {alarm_id}")
+    elif "off:" in data_read.lower():
+        alarm_id = data_read.split(":")[-1]
+        try:
+            ALARMS[int(alarm_id)]["alarm_on"] = False
+            print(f"ALARM_STATE changed to {ALARMS[int(alarm_id)]['alarm_on']}")
+        except KeyError:
+            print(f"Provided alarm id was incorrect: {alarm_id}")
+
+    elif data_read != "":
+        print(data_read)
 
 
 def communication_loop():
@@ -74,8 +99,7 @@ def communication_loop():
         if current_minute % STATUS_FREQUENCY == 0 and current_minute != last_minute:
             send_message(message)
             last_minute = current_minute
-            print(message)
-
+        listen_to_lora()
         time.sleep(0.1)
 
 

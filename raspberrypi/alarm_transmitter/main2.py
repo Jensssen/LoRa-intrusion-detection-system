@@ -7,11 +7,11 @@ from gpiozero import Button
 
 wiggle_button = Button(2)
 door_button = Button(3)
-STATUS_FREQUENCY = 1
+STATUS_FREQUENCY = 15
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS, timeout=1)
 
-ALARM_IDS = ["5f525bd9-0a81-4cba-9fa5-f3fce4937f41", "1212121212121212121212121212121"]
+ALARM_IDS = ["5f525bd9-0a81-4cba-9fa5-f3fce4937f41", "c83553b0-a8da-42ff-8d46-294904943e9b"]
 
 ALARMS = [
     {

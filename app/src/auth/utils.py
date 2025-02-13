@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import datetime, timedelta
+from typing import Optional
 
 import jwt
 
@@ -9,7 +10,7 @@ from app.src.config import Config
 ACCESS_TOKEN_EXPIRY = 3600
 
 
-def create_access_token(data: dict, expiry: timedelta = None, refresh: bool = False):
+def create_access_token(data: dict, expiry: Optional[timedelta] = None, refresh: bool = False) -> str:
     """
     Create access token using RS256.
 
@@ -24,7 +25,7 @@ def create_access_token(data: dict, expiry: timedelta = None, refresh: bool = Fa
     payload = {"data": data,
                "exp": datetime.now() + (expiry if expiry is not None else timedelta(seconds=ACCESS_TOKEN_EXPIRY)),
                "jti": str(uuid.uuid4()), "refresh": refresh
-    }
+               }
 
     token = jwt.encode(payload=payload, key=private_key, algorithm=Config.JWT_ALGORITHM)
 

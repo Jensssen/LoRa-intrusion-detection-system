@@ -6,7 +6,7 @@ import sqlalchemy.dialects.postgresql as pg
 from sqlmodel import Column, Field, Relationship, SQLModel
 
 
-class AlarmState(SQLModel, table=True):
+class AlarmState(SQLModel, table=True):  # type: ignore
     __tablename__ = "alarm_state"
     state_id: uuid.UUID = Field(sa_column=Column(pg.UUID, primary_key=True, nullable=False, default=uuid.uuid4))
     alarm_id: Optional[uuid.UUID] = Field(default=None, foreign_key="alarm.alarm_id", ondelete="CASCADE")
@@ -18,11 +18,11 @@ class AlarmState(SQLModel, table=True):
     # Relationship to Alarm
     alarm: "Alarm" = Relationship(back_populates="states")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<AlarmState {self.state_id}>"
 
 
-class Alarm(SQLModel, table=True):
+class Alarm(SQLModel, table=True):  # type: ignore
     __tablename__ = "alarm"
     alarm_id: uuid.UUID = Field(sa_column=Column(pg.UUID, primary_key=True, nullable=False, default=uuid.uuid4))
     creation_date: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.now))
@@ -31,5 +31,5 @@ class Alarm(SQLModel, table=True):
     # Relationship to AlarmState, delete AlarmStates when Alarm is deleted
     states: list["AlarmState"] = Relationship(back_populates="alarm", sa_relationship_kwargs={"cascade": "all, delete"})
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Alarm {self.alarm_id}>"

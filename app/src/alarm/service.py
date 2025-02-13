@@ -1,10 +1,9 @@
-from typing import Sequence, Type, Dict
+from typing import Sequence, Type
 
 from sqlmodel import select, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.src.db.models import Alarm, AlarmState
 from app.src.alarm.schemas import AlarmCreateModel, AlarmStateCreateModel
-from datetime import datetime
 
 
 class AlarmService:

@@ -17,7 +17,7 @@ TELEGRAM_TOKEN = os.environ['TELEGRAM_BOT_KEY']
 TELEGRAM_CHAT_ID = os.environ['TELEGRAM_CHAT_ID']
 ALARM_API_KEY = os.environ['ALARM_API_KEY']
 if TELEGRAM_TOKEN is None:
-    logger.info(f"TELEGRAM_TOKEN env var not set")
+    logger.info("TELEGRAM_TOKEN env var not set")
     raise ValueError("No Telegram token provided")
 
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
@@ -71,9 +71,9 @@ async def listen_to_lora(context: tg_ext.CallbackContext) -> None:
         ALARMS = [
             {
                 "alarm_id": "5f525bd9-0a81-4cba-9fa5-f3fce4937f41",
-                "is_open": False,
-                "wiggles": False,
-                "alarm_on": True,
+                "is_open": 0,
+                "wiggles": 0,
+                "alarm_on": 1,
             }
         ]
         for alarm_status in data_read:

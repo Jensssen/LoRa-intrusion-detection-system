@@ -24,30 +24,30 @@ ALARMS = [
 ]
 
 
-def cellar_wiggle_detection():
+def cellar_wiggle_detection() -> None:
     alarm_idx = 0
 
     while True:
         if wiggle_button.is_pressed:
-            ALARMS[alarm_idx]["wiggles"] = True
+            ALARMS[alarm_idx]["wiggles"] = 1
             send_message(alarm_state_to_str(ALARMS[alarm_idx]))
         else:
-            ALARMS[alarm_idx]["wiggles"] = False
+            ALARMS[alarm_idx]["wiggles"] = 0
         time.sleep(0.1)
 
 
-def cellar_door_open_detection():
+def cellar_door_open_detection() -> None:
     alarm_idx = 0
     while True:
         if door_button.is_pressed:
-            ALARMS[alarm_idx]["is_open"] = True
+            ALARMS[alarm_idx]["is_open"] = 1
             send_message(alarm_state_to_str(ALARMS[alarm_idx]))
         else:
-            ALARMS[alarm_idx]["is_open"] = False
+            ALARMS[alarm_idx]["is_open"] = 0
         time.sleep(0.1)
 
 
-def alarm_state_to_str(alarm: dict):
+def alarm_state_to_str(alarm: dict) -> str:
     return f"|{alarm['alarm_id']},{int(alarm['is_open'])},{int(alarm['wiggles'])},{int(alarm['alarm_on'])}|"
 
 
@@ -64,14 +64,14 @@ def listen_to_lora() -> None:
     if "on:" in data_read.lower():
         alarm_id = data_read.split(":")[-1]
         try:
-            ALARMS[int(alarm_id)]["alarm_on"] = True
+            ALARMS[int(alarm_id)]["alarm_on"] = 1
             print(f"ALARM_STATE of {alarm_id} changed to {ALARMS[int(alarm_id)]['alarm_on']}")
         except KeyError:
             print(f"Provided alarm id was incorrect: {alarm_id}")
     elif "off:" in data_read.lower():
         alarm_id = data_read.split(":")[-1]
         try:
-            ALARMS[int(alarm_id)]["alarm_on"] = False
+            ALARMS[int(alarm_id)]["alarm_on"] = 0
             print(f"ALARM_STATE changed to {ALARMS[int(alarm_id)]['alarm_on']}")
         except KeyError:
             print(f"Provided alarm id was incorrect: {alarm_id}")
@@ -80,13 +80,13 @@ def listen_to_lora() -> None:
         print(data_read)
 
 
-def communication_loop():
+def communication_loop() -> None:
     last_minute = datetime.now().minute
 
     while True:
         message = ""
         for alarm in ALARMS:
-            message += f"|{alarm['alarm_id']},{int(alarm['is_open'])},{int(alarm['wiggles'])},{int(alarm['alarm_on'])}|"
+            message += f"|{alarm['alarm_id']},{alarm['is_open']},{alarm['wiggles']},{alarm['alarm_on']}|"
 
         current_minute = datetime.now().minute
         if current_minute % STATUS_FREQUENCY == 0 and current_minute != last_minute:

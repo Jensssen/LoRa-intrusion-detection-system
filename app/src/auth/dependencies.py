@@ -9,7 +9,7 @@ from app.src.errors import InvalidToken
 class AccessTokenBearer(HTTPBearer):
     pass
 
-    def __init__(self, auto_error=True):
+    def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:

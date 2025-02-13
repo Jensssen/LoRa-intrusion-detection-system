@@ -5,7 +5,6 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlmodel import SQLModel
-from src.db.models import Alarm, AlarmState
 from alembic import context
 from src.config import Config
 

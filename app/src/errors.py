@@ -1,8 +1,9 @@
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import FastAPI, status
-from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.types import ExceptionHandler
 
 
 class AlarmException(Exception):
@@ -22,14 +23,14 @@ class InvalidToken(AlarmException):
 
 def create_exception_handler(
         status_code: int, initial_detail: Any
-) -> Callable[[Request, Exception], JSONResponse]:
-    async def exception_handler(request: Request, exc: AlarmException):
+) -> ExceptionHandler:
+    async def exception_handler(request: Request, exc: AlarmException) -> JSONResponse:
         return JSONResponse(content=initial_detail, status_code=status_code)
 
     return exception_handler
 
 
-def register_all_errors(app: FastAPI):
+def register_all_errors(app: FastAPI) -> None:
     app.add_exception_handler(
         AlarmNotFound,
         create_exception_handler(

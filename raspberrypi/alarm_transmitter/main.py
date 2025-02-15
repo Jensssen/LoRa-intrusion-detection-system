@@ -40,11 +40,14 @@ def update_door_moving_state(door_is_moving: int) -> None:
     """
     if door_is_moving == 1:
         if door.is_moving != door_is_moving:
+            print(door.is_moving, door_is_moving)
             # Door is moving and was not moving before
             door.door_is_moving()
             send_message(str(door))
     else:
         if door.is_moving != door_is_moving:
+            print(door.is_moving, door_is_moving)
+
             # Door is not moving anymore
             door.door_is_not_moving()
             send_message(str(door))
@@ -57,11 +60,15 @@ def update_door_is_open_state(door_is_open: int) -> None:
     """
     if door_is_open == 1:
         if door.is_open != door_is_open:
+            print(door.is_open, door_is_open)
+
             # Door is now open and was not open before
             door.door_is_open()
             send_message(str(door))
     else:
         if door.is_open != door_is_open:
+            print(door.is_open, door_is_open)
+
             # Door is not open anymore
             door.door_is_not_open()
             send_message(str(door))
@@ -84,7 +91,7 @@ def door_open_detection() -> None:
             update_door_is_open_state(1)
         else:
             update_door_is_open_state(0)
-        time.sleep(1)
+        time.sleep(0.1)
 
 
 def send_message(message: str) -> None:

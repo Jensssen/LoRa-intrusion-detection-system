@@ -29,7 +29,7 @@ class AlarmHandler:
             logger.debug("Response Status Code:", response.status_code)
 
             try:
-                response_json = response.json()  # Try parsing JSON response
+                response_json = response.json()
                 logger.error("Response JSON:", response_json)
             except ValueError:
                 logger.error("Response is not in JSON format:", response.text)

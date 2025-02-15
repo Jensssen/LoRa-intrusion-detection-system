@@ -27,12 +27,15 @@ ALARMS = [
 ]
 
 
-def play_alarm():
-    print("Alarm started")
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        pass
-    print("Alarm stopped")
+def alarm_sound_system() -> None:
+    while True:
+        if wiggle_button.is_pressed or door_button.is_pressed:
+            print("Alarm started")
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                pass
+            print("Alarm stopped")
+        time.sleep(0.1)
 
 
 def cellar_wiggle_detection() -> None:
@@ -42,7 +45,6 @@ def cellar_wiggle_detection() -> None:
         if wiggle_button.is_pressed:
             ALARMS[alarm_idx]["wiggles"] = 1
             send_message(alarm_state_to_str(ALARMS[alarm_idx]))
-            play_alarm()
         else:
             ALARMS[alarm_idx]["wiggles"] = 0
         time.sleep(0.1)
@@ -120,11 +122,14 @@ if __name__ == '__main__':
     t1 = threading.Thread(target=cellar_wiggle_detection)
     t2 = threading.Thread(target=cellar_door_open_detection)
     t3 = threading.Thread(target=communication_loop)
+    t4 = threading.Thread(target=alarm_sound_system)
 
     t1.start()
     t2.start()
     t3.start()
+    t4.start()
 
     t1.join()
     t2.join()
     t3.join()
+    t4.join()

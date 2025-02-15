@@ -42,6 +42,7 @@ def cellar_wiggle_detection() -> None:
         if wiggle_button.is_pressed:
             ALARMS[alarm_idx]["wiggles"] = 1
             send_message(alarm_state_to_str(ALARMS[alarm_idx]))
+            play_alarm()
         else:
             ALARMS[alarm_idx]["wiggles"] = 0
         time.sleep(0.1)

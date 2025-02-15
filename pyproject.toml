@@ -12,6 +12,7 @@ dependencies = [
     "fastapi[standard]>=0.115.8",
     "loguru>=0.7.3",
     "pydantic-settings>=2.7.1",
+    "pygame>=2.6.1",
     "pyjwt>=2.10.1",
     "pyserial>=3.5",
     "python-dotenv>=1.0.1",

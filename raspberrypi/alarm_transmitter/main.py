@@ -2,12 +2,15 @@ import threading
 import time
 from datetime import datetime
 
+import pygame
 import serial
 from gpiozero import Button
 
 wiggle_button = Button(2)
 door_button = Button(3)
 STATUS_FREQUENCY = 15
+pygame.mixer.init()
+pygame.mixer.music.load("red-alert_nuclear_buzzer-99741.mp3")
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS, timeout=1)
 
@@ -22,6 +25,14 @@ ALARMS = [
         "name": "Cellar"
     }
 ]
+
+
+def play_alarm():
+    print("Alarm started")
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        pass
+    print("Alarm stopped")
 
 
 def cellar_wiggle_detection() -> None:

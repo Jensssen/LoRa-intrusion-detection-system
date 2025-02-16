@@ -5,12 +5,13 @@ from datetime import datetime
 
 import pygame
 import serial
-from gpiozero import Button
+from gpiozero import Button, LED
 
 from alarm_state import AlarmState
 
 wiggle_button = Button(2)
 door_button = Button(3)
+alarm_on_off_led = LED(17)
 STATUS_FREQUENCY = 15
 pygame.mixer.init()
 pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "red-alert_nuclear_buzzer-99741.mp3"))
@@ -18,6 +19,7 @@ lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE
                      bytesize=serial.EIGHTBITS, timeout=1)
 
 door = AlarmState(alarm_id=0, is_open=0, is_moving=0, alarm_on=1)
+alarm_on_off_led.on()
 
 
 def alarm_sound_system() -> None:
@@ -29,8 +31,6 @@ def alarm_sound_system() -> None:
                 while pygame.mixer.music.get_busy():
                     pass
                 print("Alarm sound played!")
-            else:
-                print("No alarm sound played because alarm is off!")
         time.sleep(0.1)
 
 
@@ -105,11 +105,14 @@ def listen_to_lora() -> None:
                 door.turn_alarm_on()
                 print("Turned alarm on!")
                 send_message(str(door))
+                alarm_on_off_led.on()
+
         elif "off:" in data_read.lower():
             alarm_id = data_read.split(":")[-1]
             if int(alarm_id) == door.alarm_id:
                 door.turn_alarm_off()
                 print("Turned alarm off!")
+                alarm_on_off_led.off()
                 send_message(str(door))
         elif data_read != "":
             print(data_read)

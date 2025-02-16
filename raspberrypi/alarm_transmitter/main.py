@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 from datetime import datetime
@@ -10,9 +11,9 @@ from alarm_state import AlarmState
 
 wiggle_button = Button(2)
 door_button = Button(3)
-STATUS_FREQUENCY = 15
+STATUS_FREQUENCY = 1
 pygame.mixer.init()
-pygame.mixer.music.load("red-alert_nuclear_buzzer-99741.mp3")
+pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "red-alert_nuclear_buzzer-99741.mp3"))
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                      bytesize=serial.EIGHTBITS, timeout=1)
 
@@ -129,17 +130,16 @@ def communication_loop() -> None:
             send_message(str(door))
             last_minute = current_minute
         time.sleep(1)
-        print(str(door))
 
 
 if __name__ == '__main__':
     print("Start alarm system ...")
 
-    t1 = threading.Thread(target=door_moving_detection)  # DONE
-    t2 = threading.Thread(target=door_open_detection)  # DONE
+    t1 = threading.Thread(target=door_moving_detection)
+    t2 = threading.Thread(target=door_open_detection)
     t3 = threading.Thread(target=communication_loop)
-    t4 = threading.Thread(target=listen_to_lora)  # DONE
-    t5 = threading.Thread(target=alarm_sound_system)  # DONE
+    t4 = threading.Thread(target=listen_to_lora)
+    t5 = threading.Thread(target=alarm_sound_system)
 
     t1.start()
     t2.start()

@@ -101,12 +101,16 @@ def listen_to_lora() -> None:
         data_read = lora.readline().decode('utf-8').strip()
         if "on:" in data_read.lower():
             alarm_id = data_read.split(":")[-1]
-            if alarm_id == door.alarm_id:
+            if int(alarm_id) == door.alarm_id:
                 door.turn_alarm_on()
+                print("Turned alarm on!")
+                send_message(str(door))
         elif "off:" in data_read.lower():
             alarm_id = data_read.split(":")[-1]
-            if alarm_id == door.alarm_id:
+            if int(alarm_id) == door.alarm_id:
                 door.turn_alarm_off()
+                print("Turned alarm off!")
+                send_message(str(door))
         elif data_read != "":
             print(data_read)
         time.sleep(0.1)

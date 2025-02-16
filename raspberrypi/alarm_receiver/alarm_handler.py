@@ -26,13 +26,13 @@ class AlarmHandler:
         try:
             response = requests.post(self.url + "create_alarm_state", json=data, headers=self.headers, timeout=10)
             response.raise_for_status()
-            logger.debug("Response Status Code:", response.status_code)
+            logger.info(f"Response Status Code: {response.status_code}")
 
             try:
                 response_json = response.json()
-                logger.error("Response JSON:", response_json)
+                logger.debug(f"Response JSON: {response_json}")
             except ValueError:
-                logger.error("Response is not in JSON format:", response.text)
+                logger.error(f"Response is not in JSON format: {response.text}")
 
         except requests.exceptions.Timeout:
             logger.error("Request timed out. The server may be unreachable.")

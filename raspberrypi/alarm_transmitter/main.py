@@ -11,7 +11,7 @@ from alarm_state import AlarmState
 
 wiggle_button = Button(2)
 door_button = Button(3)
-STATUS_FREQUENCY = 1
+STATUS_FREQUENCY = 15
 pygame.mixer.init()
 pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "red-alert_nuclear_buzzer-99741.mp3"))
 lora = serial.Serial(port='/dev/ttyS0', baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
@@ -41,14 +41,11 @@ def update_door_moving_state(door_is_moving: int) -> None:
     """
     if door_is_moving == 1:
         if door.is_moving != door_is_moving:
-            print(door.is_moving, door_is_moving)
             # Door is moving and was not moving before
             door.door_is_moving()
             send_message(str(door))
     else:
         if door.is_moving != door_is_moving:
-            print(door.is_moving, door_is_moving)
-
             # Door is not moving anymore
             door.door_is_not_moving()
             send_message(str(door))
@@ -61,15 +58,11 @@ def update_door_is_open_state(door_is_open: int) -> None:
     """
     if door_is_open == 1:
         if door.is_open != door_is_open:
-            print(door.is_open, door_is_open)
-
             # Door is now open and was not open before
             door.door_is_open()
             send_message(str(door))
     else:
         if door.is_open != door_is_open:
-            print(door.is_open, door_is_open)
-
             # Door is not open anymore
             door.door_is_not_open()
             send_message(str(door))

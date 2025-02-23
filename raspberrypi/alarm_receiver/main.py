@@ -31,11 +31,13 @@ ALARM_NAMES = ["Cellar"]
 
 
 def is_valid_binary_pattern(s: str) -> bool:
+    """Check if the given string is a valid alarm state pattern."""
     pattern = r"^(0|[1-9]\d*)(,(0|1)){3}(,(0|[1-9]\d*)(,(0|1)){3})*$"
     return bool(re.fullmatch(pattern, s))
 
 
 async def listen_to_lora(context: tg_ext.CallbackContext) -> None:
+    """Listen to incoming LoRa messages and send the alarm state to the API."""
     data_read = lora.readline().decode('utf-8').strip()
     if data_read != "":
         if is_valid_binary_pattern(data_read):
@@ -58,26 +60,29 @@ async def listen_to_lora(context: tg_ext.CallbackContext) -> None:
 
 
 def send_lora_message(message: str) -> None:
+    """Send LoRa message."""
     lora.write(bytes(message, 'utf-8'))
     logger.debug(f"LoRa message was sent: {message}")
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle incoming telegram messages. The message is checked for on/off commands."""
-    if update.message.text.lower()[0:3] == "on:":
-        message = update.message.text.lower()
-        command, alarm_id = message.split(":")
-        send_lora_message(update.message.text.lower())
-        await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned ON")
-    elif update.message.text.lower()[0:4] == "off:":
-        message = update.message.text.lower()
-        command, alarm_id = message.split(":")
-        send_lora_message(update.message.text.lower())
-        await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned OFF")
-    else:
-        await update.message.reply_text(f"Your Provided command: {update.message.text} is not supported. \n"
-                                        f"Please use one of the following commands: \n"
-                                        f"on:<alarm_idx>, off:<alarm_idx>")
+    user_first_name = str(update.message.chat.first_name)
+    if user_first_name == os.environ['TELEGRAM_USER_NAME']:
+        if update.message.text.lower()[0:3] == "on:":
+            message = update.message.text.lower()
+            command, alarm_id = message.split(":")
+            send_lora_message(update.message.text.lower())
+            await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned ON")
+        elif update.message.text.lower()[0:4] == "off:":
+            message = update.message.text.lower()
+            command, alarm_id = message.split(":")
+            send_lora_message(update.message.text.lower())
+            await update.message.reply_text(f"Alarm with ID {alarm_id} has been turned OFF")
+        else:
+            await update.message.reply_text(f"Your Provided command: {update.message.text} is not supported. \n"
+                                            f"Please use one of the following commands: \n"
+                                            f"on:<alarm_idx>, off:<alarm_idx>")
 
 
 if __name__ == '__main__':

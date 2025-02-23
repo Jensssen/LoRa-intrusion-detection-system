@@ -67,8 +67,7 @@ def send_lora_message(message: str) -> None:
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle incoming telegram messages. The message is checked for on/off commands."""
-    user_first_name = str(update.message.chat.first_name)
-    if user_first_name == os.environ['TELEGRAM_USER_NAME']:
+    if str(update.message.chat.first_name) == os.environ['TELEGRAM_USER_NAME']:
         if update.message.text.lower()[0:3] == "on:":
             message = update.message.text.lower()
             command, alarm_id = message.split(":")
